@@ -1,0 +1,13 @@
+.layerNodeText{
+  font-family: "Roboto", sans-serif;
+}
+
+.graphViewToolTip{
+  position: absolute;
+  padding: 8px;
+  font: 12px sans-serif;
+  background: white;
+  border: 1px solid darkgray;
+  border-radius: 8px;
+  pointer-events: none;
+}

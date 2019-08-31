@@ -1,0 +1,57 @@
+.optimPreviewCanvas{
+  border-width: 2px;
+  border-color: darkgray;
+  border-style: solid;
+  margin: 5px;
+  display: grid;
+}
+
+.secondaryPreviewLayer{
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.secondaryPreviewCtrlLayer{
+  grid-column: 1;
+  grid-row: 1;
+}
+
+/*
+
+.optimPreviewCanvas:hover{
+  -webkit-box-shadow:inset 0px 0px 0px 1px #000;
+  -moz-box-shadow:inset 0px 0px 0px 1px #000;
+  box-shadow:inset 0px 0px 0px 1px #000;
+  border-color: black;
+}
+*/
+
+.inputPreviewContainer{
+  height: 100%;
+}
+
+.optimPreviewCanvas.selected{
+  border-color: orange;
+}
+
+.optimPreviewCanvasContainer{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.activationCanvasContainer{
+  overflow: hidden;
+}
+
+.detailViewContainer{
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+}
+
+.noOutline{
+  outline: none;
+}

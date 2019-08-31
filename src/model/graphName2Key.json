@@ -1,0 +1,6 @@
+{
+    "sequential_1": "MnistNet",
+    "inception_v1": "Inception V1",
+    "alexnet": "AlexNet",
+    "vgg16": "VGG16"
+}

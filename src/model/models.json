@@ -1,0 +1,38 @@
+{
+	"AlexNet": {
+		"name": "AlexNet",
+		"path": "models/alexnet/model.json",
+		"classlist": "imnet",
+		"size": "244 mb"
+	},
+	"Inception V1": {
+		"name": "Inception V1",
+		"path": "models/inceptionv1/model.json",
+		"classlist": "imnet",
+		"size": "54 mb",
+		"defaultStyleLayers": {
+			"content": [
+				"mixed3b"
+			],
+			"style": [
+				"conv2d2",
+				"mixed3a",
+				"mixed4a",
+				"mixed4b",
+				"mixed4c"
+			]
+		}
+	},
+	"VGG16": {
+		"name": "VGG16",
+		"path": "models/vgg16/model.json",
+		"classlist": "imnet",
+		"size": "527 mb"
+	},
+	"MnistNet": {
+		"name": "MnistNet",
+		"path": "models/mnistnet/model.json",
+		"classlist": "mnist",
+		"size": "8 mb"
+	}
+}

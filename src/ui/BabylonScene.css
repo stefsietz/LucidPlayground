@@ -1,0 +1,14 @@
+#multiActivationCanvas {
+  width: 100%;
+  height: 100%;
+}
+
+#neuronSelectionCanvas {
+  width: 100%;
+  height: 100%;
+}
+
+#activationAdjustCanvas {
+  width: 100%;
+  height: 100%;
+}

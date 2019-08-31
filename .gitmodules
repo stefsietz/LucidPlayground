@@ -1,0 +1,3 @@
+[submodule "src/LucidJS"]
+	path = src/LucidJS
+	url = https://github.com/stefsietz/LucidJS.git
