@@ -24,6 +24,15 @@ export default class NeuronOverlayCanvas extends Component {
        />);
   }
 
+  /**
+   * Fills canvas with pixel data.
+   * @param {*} pixelData Raw pixel array
+   * @param {*} canvas Canvas to draw on to
+   * @param {*} w width of pixel data
+   * @param {*} h height of pixel data
+   * @param {boolean} rgb rgb or greyscale status of pixel data
+   * @param {*} channel channel to take from pixel data in case multiple channels are contained
+   */
   drawCanvas(pixelData, canvas, w, h, rgb, channel=0){
     let canvCtx = canvas.getContext("2d");
     const cw = canvas.width;

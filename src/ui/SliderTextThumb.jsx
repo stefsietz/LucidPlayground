@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 
+/**
+ * Slider thumb that can display text.
+ */
 export default class SecondaryPreview extends Component {
 
   render(props){

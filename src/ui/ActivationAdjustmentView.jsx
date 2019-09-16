@@ -13,7 +13,10 @@ import "@babylonjs/core/Meshes/meshBuilder";
 import "babylonjs-inspector/babylon.inspector.bundle.js"
 import "./DetailView.css";
 
-export default class ActivationView extends Component {
+/**
+ * Displays activations of single featuremap shifted and scaled by parameters.
+ */
+export default class ActivationAdjustmentView extends Component {
 
   constructor(props) {
     super(props);
@@ -51,6 +54,9 @@ export default class ActivationView extends Component {
     })
   }
 
+    /**
+   * Calls methods that update scene state and then renders.
+   */
   updateAndRender(){
     if (this.scene) {
       this.updateTexture();
@@ -59,6 +65,9 @@ export default class ActivationView extends Component {
     }
   }
 
+  /**
+   * Creates or updates BabylonJS texture width feature map activation data.
+   */
   updateTexture() {
     let width = 1;
     let height = 1;
@@ -100,6 +109,9 @@ export default class ActivationView extends Component {
     this.shaderMaterial.setTexture('textureSampler', this.activationTexture);
   }
 
+  /**
+   * Updates shader uniforms.
+   */
   updateUniforms() {
     this.shaderMaterial.setFloat('shift', this.props.shift);
     this.shaderMaterial.setFloat('scale', this.props.scale);
@@ -123,6 +135,9 @@ export default class ActivationView extends Component {
     )
   }
 
+  /**
+   * Resize event action.
+   */
   onResize = (w, h) => {
     this.w = w;
     this.h = h;
@@ -130,6 +145,10 @@ export default class ActivationView extends Component {
     this.updateAndRender();
   }
 
+  /**
+   * Creates square geometry that gets instanced for feature map representations and its shader.
+   * @param {*} scene 
+   */
   createBaseSquare(scene) {
     this.shaderMaterial = new ShaderMaterial(
       "shader", scene, "./activationAdjustmentShader",

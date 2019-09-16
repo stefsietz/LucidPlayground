@@ -8,6 +8,9 @@ import PauseIcon from '@material-ui/icons/Pause';
 import ResetIcon from '@material-ui/icons/Replay';
 import SkipIcon from '@material-ui/icons/SkipNext';
 
+/**
+ * Component that contains play/stop-, reset- and single step buttons
+ */
 export default class PlayButtonGroup extends Component {
 
     constructor(props) {

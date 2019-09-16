@@ -1,5 +1,8 @@
 import Layer from './layer/Layer.js'
 
+/**
+ * Reads model.json to store structure of the graph, provides some methods to calculate the layout.
+ */
 export default class Graph {
   constructor(modelJson){
     this.name = "";
@@ -10,6 +13,10 @@ export default class Graph {
     this.initFromModelJson(modelJson);
   }
 
+  /**
+   * Initialize data structures from json object.
+   * @param {*} modelJson json object from  model.json file
+   */
   initFromModelJson(modelJson){
     this.name = modelJson['modelTopology']['model_config']['config']['name'];
     this.type = modelJson['modelTopology']['model_config']['class_name'];
@@ -19,6 +26,10 @@ export default class Graph {
     this.setInputOutputLayers(layerList);
   }
 
+  /**
+   * Creates layer dictonary from layer list
+   * @param {*} layerList list of layers from model.json
+   */
   initLayers (layerList){
     for (let i=0; i<layerList.length; i++) {
       let layer = layerList[i];
@@ -29,6 +40,10 @@ export default class Graph {
     }
   }
 
+  /**
+   * Assignes inbound and outbound nodes to layers.
+   * @param {*} layerList list of layers from model.json
+   */
   connectLayers (layerList) {
     for (let i=0; i<layerList.length; i++) {
       let layer = layerList[i];
@@ -49,6 +64,10 @@ export default class Graph {
     }
   }
 
+  /**
+   * Assigns input and output layers.
+   * @param {*} layerList list of layers from model.json
+   */
   setInputOutputLayers(layerList) {
     for (let i=0; i<layerList.length; i++) {
       let layer = this.layers[layerList[i]['name']];
@@ -61,6 +80,9 @@ export default class Graph {
     }
   }
 
+  /**
+   * Returns list of layers sorted by distance from input node.
+   */
   getSortedLayerList(){
     const distList = this.getLayoutByInputDist();
     let layerList = [];
@@ -73,6 +95,9 @@ export default class Graph {
     return layerList;
   }
 
+  /**
+   * Returns dictonary of lists of layers, with distance to input as key.
+   */
   getLayoutByInputDist(){
     let distDict = {}
     for(const [name, layer] of Object.entries(this.layers)){
@@ -92,6 +117,9 @@ export default class Graph {
     return outList;
   }
 
+  /**
+   * Returns dictonary of lists of layers, with distance to outpu as key.
+   */
   getLayoutByOutputDist(){
     let distDict = {}
     for(const [name, layer] of Object.entries(this.layers)){
@@ -111,12 +139,17 @@ export default class Graph {
     return outList;
   }
 
+  /**
+   * Calculates distance to input node for each layer (gets cached in layer object).
+   */
   calcInputDists() {
     for (const [name, layer] of Object.entries(this.layers)) {
       const dist = layer.calcInputDist();
     }
   }
-
+  /**
+   * Calculates distance to output node for each layer (gets cached in layer object).
+   */
   calcOutputDists() {
     for (const [name, layer] of Object.entries(this.layers)) {
       const dist = layer.calcOutputDist();

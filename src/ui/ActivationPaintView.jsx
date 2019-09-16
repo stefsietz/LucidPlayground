@@ -42,10 +42,6 @@ export default class ActivationView extends HoverSquareComponent {
     })
   }
 
-  getShiftIsDown() {
-    return this.shiftIsDown;
-  }
-
   onSceneMount = (e) => {
     const {scene, engine, canvas} = e;
     this.scene = scene;

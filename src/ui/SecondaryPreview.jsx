@@ -38,6 +38,9 @@ export const styleSliders = {
   NOISE: 'Noise',
 }
 
+/**
+ * Container component for secondary image preview.
+ */
 export default class SecondaryPreview extends Component {
   constructor(props){
     super(props);

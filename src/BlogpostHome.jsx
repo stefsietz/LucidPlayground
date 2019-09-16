@@ -24,7 +24,6 @@ import ParamView from './ui/ParamView';
 import { loadJSON, loadJSONFromLocalFile } from './util.js';
 import { getImgDataFromFile } from './DrawingHelper'
 
-
 export const scdryPrvMode = {
   COMPARE: 'compare',
   NEURON: 'neuron',
@@ -36,7 +35,9 @@ export const scdryPrvMode = {
 export const learningRates = [0.00005, 0.0001, 0.0005, 0.001,
   0.005, 0.01, 0.05, 0.1, 0.5, 1, 5];
 
-
+/**
+ * Represents main component containing blogpost and normal GUI at the top.
+ */
 export default class BlogpostHome extends Component {
 
   constructor(props) {
@@ -79,6 +80,9 @@ export default class BlogpostHome extends Component {
     this.LB = new LucidBackend();
   }
 
+  /**
+   * Returns graph view JSX
+   */
   graphview() {
     return (
       <GraphView
@@ -93,6 +97,9 @@ export default class BlogpostHome extends Component {
       />);
   }
 
+  /**
+   * Returns detail view JSX
+   */
   detailview() {
     let currentInput = this.LB.hasCurrentInput() ?
       this.LB.getCurrentInput() :
@@ -163,6 +170,9 @@ export default class BlogpostHome extends Component {
     />);
   }
 
+  /**
+   * Returns load title depending on load state.
+   */
   loadTitle() {
     if (this.LB.getLoadStatus() === loadStates.INITIAL) {
       return "No graph loaded";
@@ -173,10 +183,16 @@ export default class BlogpostHome extends Component {
     }
   }
 
+  /**
+   * Callback for model loading progress.
+   */
   progressCb = (progress) => {
     this.setState({ modelProgress: progress });
   }
 
+  /**
+   * Lads model from list of files (json and bin files all in one list)
+   */
   loadModelFromFile = (files) => {
     let topoFile;
     const weightFiles = [];
@@ -200,6 +216,9 @@ export default class BlogpostHome extends Component {
     });
   }
 
+  /**
+   * Loads model from URL
+   */
   loadModel = (model, showModal = true, initialLayer = undefined, cb = undefined) => {
     const modelPath = process.env.PUBLIC_URL + '/' + model.path;
     loadJSON(modelPath, (modelJson) => {
@@ -220,6 +239,9 @@ export default class BlogpostHome extends Component {
     });
   }
 
+  /**
+   * Callback called after loading model has finished.
+   */
   setFinishModelLoadingState = () => {
     const ip = this.LB.getInputParams();
     this.setState({
@@ -233,6 +255,9 @@ export default class BlogpostHome extends Component {
     this.LB.setLearningRate(learningRates[this.state.learningRate]);
   }
 
+  /**
+   * Called before starting model loading, sets up progress bar.
+   */
   setStartModelLoadingState = (model, modelJson, showModal) => {
     const classList = this.getClasslist(model.classlist);
 
@@ -254,6 +279,9 @@ export default class BlogpostHome extends Component {
     this.setState({ graph: graph });
   }
 
+  /**
+   * Sets up default parameters for inception model.
+   */
   setupInceptionParams = () => {
     this.setState({
       inputSize: 128,
@@ -273,6 +301,9 @@ export default class BlogpostHome extends Component {
     });
   }
 
+  /**
+   * Sets up default parameters for Mnist model.
+   */
   setupMnistParams = () => {
     this.setState({
       inputSize: 32,
@@ -292,11 +323,14 @@ export default class BlogpostHome extends Component {
       this.setState(this.state);
     });
   }
-
+ 
   componentDidMount() {
     document.body.onscroll = this.checkOnScrollEvents;
   }
 
+  /**
+   * Action for "apply" button in parameter view.
+   */
   applyInputParams = () => {
     if (!this.LB.hasModel()) {
       this.setState({
@@ -981,6 +1015,9 @@ export default class BlogpostHome extends Component {
 
   }
 
+  /**
+   * On scroll callback.
+   */
   checkOnScrollEvents = () => {
     if(!this.state.scrollTriggers){
       return;
@@ -1016,6 +1053,9 @@ export default class BlogpostHome extends Component {
     }
   }
 
+  /**
+   * Button action that starts intro tour.
+   */
   startTour = () => {
     let tour;
     if (this.state.tour && this.state.tour.isActive()) {
@@ -1029,6 +1069,10 @@ export default class BlogpostHome extends Component {
     console.log(tour);
   }
 
+  /**
+   * Return list off class labels depending on dataset (imagenet/mnist).
+   * @param {*} classListName 
+   */
   getClasslist(classListName) {
     if (classListName === 'imnet') {
       return this.imnetClasses;
@@ -1037,6 +1081,9 @@ export default class BlogpostHome extends Component {
     }
   }
 
+  /**
+   * Button action for 'arrow' button below main GUI.
+   */
   scrollTween = (offset) => {
     return function () {
       let i = d3.interpolateNumber(window.pageYOffset ||
@@ -1045,6 +1092,9 @@ export default class BlogpostHome extends Component {
     };
   }
 
+  /**
+   * Button action for starting optimization.
+   */
   startOptimization = (iters) => {
     const it = iters ? iters : 1000000;
     this.LB.startOptimization(it, (stopped) => {
@@ -1058,6 +1108,9 @@ export default class BlogpostHome extends Component {
     });
   }
 
+  /**
+   * Sets blogpost base image and calls callback with ImageData when finished loading.
+   */
   getBlogPostBaseImageData = (cb) => {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');

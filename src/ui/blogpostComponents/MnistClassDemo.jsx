@@ -10,7 +10,10 @@ import PlayButtonGroup from "./PlayButtonGroup"
 import { fillCanvasPixelsWithRgbAndAlpha, fillCanvasPixelsWithGreyAndAlpha }
     from '../../DrawingHelper.js';
 
-export default class PyramidDemo extends Component {
+    /**
+     * Component that lets the user optimize for class output objective.
+     */
+export default class MnistClassDemo extends Component {
 
     constructor(props) {
         super(props);
