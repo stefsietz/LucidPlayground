@@ -319,6 +319,9 @@ const draw = (props) => {
 
 }
 
+/**
+ * Component containing the graph visualization of the model.
+ */
 export default class GraphView extends Component {
 
   componentDidMount(){

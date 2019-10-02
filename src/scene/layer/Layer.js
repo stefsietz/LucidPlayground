@@ -1,3 +1,6 @@
+/**
+ * Stores layer information and provides methods to calculate distances to in/output nodes.
+ */
 export default class Layer{
   constructor(name, class_name, config){
     this.name = name;
@@ -10,6 +13,9 @@ export default class Layer{
     this.mesh = undefined;
   }
 
+  /**
+   * Calculates distance to input layer/node.
+   */
   calcInputDist(){
     if (this.inboundNodes.length === 0) {
       this.inputDistance = 0;
@@ -28,6 +34,9 @@ export default class Layer{
     return this.inputDistance;
   }
 
+  /**
+   * Calculates distance to output layer/node.
+   */
   calcOutputDist(){
     if (this.outboundNodes.length === 0) {
       this.outputDistance = 0;

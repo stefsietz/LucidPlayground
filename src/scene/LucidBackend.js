@@ -7,6 +7,9 @@ import {fillCanvasPixelsWithRgbAndAlpha, fillCanvasPixelsWithGreyAndAlpha}
 from '../DrawingHelper.js';
 import * as tf from '@tensorflow/tfjs';
 
+/**
+ * Serves as intermediate layer between LucidJS library and React user interface code.
+ */
 export class LucidBackend{
   constructor(){
     this.loadStatus = loadStates.INITIAL;
@@ -19,11 +22,22 @@ export class LucidBackend{
     this.lucidRenderer.setObjectiveType(this.objectiveType);
   }
 
+  /**
+   * Loads model from client-side file
+   * @param {*} topoFile 
+   * @param {*} weightFiles 
+   * @param {*} progressCb progress callback, can be used for status bar
+   */
   async loadModelFromFile(topoFile, weightFiles, progressCb){
     await this.loadModel(tf.io.browserFiles(
       [topoFile, ...weightFiles]), progressCb);
   }
 
+  /**
+   * Loads model from server directory.
+   * @param {*} modelPath 
+   * @param {*} progressCb progress callback, can be used for status bar
+   */
   async loadModel(modelPath, progressCb) {
     if(this.loadStatus === loadStates.LOADING) {
       console.log("Already loading!");
@@ -49,36 +63,60 @@ export class LucidBackend{
     this.setFeatureMapLayer(initialLayer);
   }
 
+  /**
+   * Get model from renderer.
+   */
   getModel = () => {
     return this.lucidRenderer.model;
   }
 
+  /**
+   * Get model name from renderer.
+   */
   getModelName = () => {
     return this.lucidRenderer.model.name;
   }
 
+  /**
+   * Get load status from renderer.
+   */
   getLoadStatus = () => {
     return this.loadStatus;
   }
 
+  /**
+   * Check if renderer is ready to optimize.
+   */
   canOptimize = () => {
     return this.lucidRenderer.canOptimize() && !this.lucidRenderer.isOptimizing;
   }
 
+  /**
+   * Check if renderer is optimizing.
+   */
   isOptimizing = () => {
     return this.lucidRenderer.isOptimizing;
   }
 
+  /**
+   * Get input parameters from renderer.
+   */
   getInputParams = () => {
     return this.lucidRenderer.inputParams;
   }
 
+  /**
+   * Resets input, can be called while optimizing.
+   */
   resetInput = () => {
     this.lucidRenderer.compileInput();
     this.lucidRenderer.objectiveParams.activationModifications = {};
     this.setContentImage();
   }
 
+  /**
+   * Sets input parameters. Not possible while optimizing.
+   */
   setInputParams = (inputParams) => {
     this.lucidRenderer.setInputParams(inputParams);
     this.setClassObjFrequencyLevelWeights(
@@ -86,6 +124,9 @@ export class LucidBackend{
     this.setContentImage();
   }
 
+  /**
+   * Set optimization objective type, can be called while optimizing.
+   */
   setObjectiveType = (type) => {
     this.objectiveType = type;
     if(this.lucidRenderer) {
@@ -93,10 +134,16 @@ export class LucidBackend{
     }
   }
 
+  /**
+   * Get current objective type.
+   */
   getObjectiveType = () => {
     return this.objectiveType;
   }
 
+  /**
+   * Sets selected layer. Not possible while optimizing.
+   */
   setLayer = (layer) => {
     if(! this.lucidRenderer.isOptimizing) {
       this.lucidRenderer.setLayer(layer);
@@ -106,23 +153,38 @@ export class LucidBackend{
     }
   }
 
+  /**
+   * Gets currently selected layer.
+   */
   getLayer = () => {
     return this.lucidRenderer.objectiveParams.layer;
   }
 
+  /**
+   * Sets layer to get feature map tensors for.
+   */
   setFeatureMapLayer = (layer) => {
     this.lucidRenderer.setFeatureMapLayer(layer);
   }
 
+  /**
+   * Sets channel index for 'channel' optimization objective.
+   */
   setChannel = (channel) => {
     this.storeCurrentInput();
     this.lucidRenderer.setChannel(channel);
   }
 
+  /**
+   * Returns currently selected channel for 'channel' optimization objective.
+   */
   getChannel = () => {
     return this.lucidRenderer.objectiveParams.channel;
   }
 
+  /**
+   * Sets neuron position for 'neuron' optimization objective.
+   */
   setNeuron = (x, y) => {
     this.storeCurrentInput();
     const [cb, w, h, c] = this.lucidRenderer.getActivationShape();
@@ -131,12 +193,18 @@ export class LucidBackend{
     this.lucidRenderer.setNeuron(x, y);
   }
 
+  /**
+   * Returns currently selected neuron for 'neuron' optimization objective.
+   */
   getNeuron = () => {
     const x = this.lucidRenderer.objectiveParams.neuronX;
     const y = this.lucidRenderer.objectiveParams.neuronY;
     return [x, y];
   }
 
+  /**
+   * Sets weights for individual pyramid layers when optimizing for 'class' objective. Experimental.
+   */
   setClassObjFrequencyLevelWeights = (level) => {
     const nLayers = this.lucidRenderer.inputParams.pyramidLayers;
     const rangePerLayer = 1 / nLayers;
@@ -155,10 +223,16 @@ export class LucidBackend{
     this.lucidRenderer.objectiveParams.pyrLayerWeights = weights.reverse();
   }
 
+  /**
+   * Set style image for 'style' objective.
+   */
   setStyleImage = (styleImg) => {
     this.lucidRenderer.setStyleImage(styleImg);
   }
 
+  /**
+   * Returns current style image.
+   */
   getStyleImage = () => {
     if(this.lucidRenderer.objectiveParams.styleImage){
       return this.lucidRenderer.objectiveParams.styleImage.dataSync();
@@ -167,6 +241,9 @@ export class LucidBackend{
     }
   }
 
+  /**
+   * Set content image for 'style' objective.
+   */
   setContentImage = (contentImg) => {
     if(!contentImg){
       let transformF = (input) => input;
@@ -181,6 +258,9 @@ export class LucidBackend{
     this.lucidRenderer.setContentImage(contentImg);
   }
 
+  /**
+   * Returns current content image.
+   */
   getContentImage = () => {
     if(this.lucidRenderer.objectiveParams.contentImage){
       return this.lucidRenderer.objectiveParams.contentImage.dataSync();
@@ -189,6 +269,9 @@ export class LucidBackend{
     }
   }
 
+  /**
+   * Set style layers for 'style' objective.
+   */
   setStyleLayers = (checkedLayers, type) => {
     let dict = this.getStyleLayers();
     dict = dict ? dict : {};
@@ -200,16 +283,25 @@ export class LucidBackend{
     this.lucidRenderer.setStyleLayers(dict);
   }
 
+  /**
+   * Return current style layers for 'style' objective.
+   */
   getStyleLayers = () => {
     return this.lucidRenderer.objectiveParams.styleLayers;
   }
 
+  /**
+   * Returns shape for style image.
+   */
   getStyleImageShape = () => {
     const w = this.lucidRenderer.inputParams.inputSize;
     const sh = [1, w, w, 3]
     return sh;
   }
 
+  /**
+   * Sets activation modification parameters. Experimental.
+   */
   setActivationModifications = (mods) => {
     const currMods = this.getActivationModifications();
     for(const [layerName, layerDict] of Object.entries(mods)){
@@ -231,50 +323,82 @@ export class LucidBackend{
     }
   }
 
+  /**
+   * Returns activation modification parameters. Experimental.
+   */
   getActivationModifications = () => {
     return this.lucidRenderer.objectiveParams.activationModifications;
   }
 
+  /**
+   * Sets class for 'class' optimization objective.
+   */
   setClass = (classInd) => {
     this.storeCurrentInput();
     this.lucidRenderer.setClass(classInd);
   }
-
+  /**
+   * Returns current class for 'class' optimization objective.
+   */
   getClass = () => {
     return this.lucidRenderer.objectiveParams.classInd;
   }
 
+  /**
+   * Set negative toggle to invert loss function.
+   */
   setNegative = (negative) => {
     this.storeCurrentInput();
     this.lucidRenderer.setNegative(negative);
   }
 
+  /**
+   * Get current negative toggle status.
+   */
   getNegative = () => {
     return this.lucidRenderer.objectiveParams.negative;
   }
 
+  /**
+   * Set jitter amount in pixels.
+   */
   setJitter = (jitter) => {
     this.storeCurrentInput();
     this.lucidRenderer.setJitter(jitter);
   }
 
+  /**
+   * Returns current jitter.
+   */
   getJitter = () => {
     return this.lucidRenderer.objectiveParams.jitter;
   }
 
+  /**
+   * Sets learning rate for optimizer.
+   */
   setLearningRate = (learningRate) => {
     this.lucidRenderer.setLearningRate(learningRate);
   }
 
+  /**
+   * Returns current learning rate.
+   */
   getLearningRate = () => {
     return this.lucidRenderer.objectiveParams.learningRate;
   }
 
+  /**
+   * Starts optimization loop.
+   */
   startOptimization = (iterations=1000, optimCallback) => {
     this.lucidRenderer.startOptimization(iterations, optimCallback);
     this.loadStatus = loadStates.OPTIMIZING;
   }
 
+  /**
+   * Validates optimization input.
+   */
   validateOptimizationInput = () => {
     const type = this.lucidRenderer.objectiveParams.type;
     if(type === objectiveTypes.STYLE
@@ -292,6 +416,9 @@ export class LucidBackend{
      return null;
   }
 
+  /**
+   * Downloads image data from tensor synchronously.
+   */
   getImageDataFromTensor = (imT) => {
     const [b, h, w, ch] = imT.shape;
     const data = imT.dataSync();
@@ -302,16 +429,26 @@ export class LucidBackend{
     return imData;
   }
 
+  /**
+   * Stops optimization loop.
+   */
   stopOptimization = (cb) => {
     this.storeCurrentInput();
     this.loadStatus = loadStates.LOADED;
     this.lucidRenderer.stopOptimization(cb);
   }
 
+  /**
+   * Checks if renderer has input set.
+   */
   hasCurrentInput = () => {
     return this.lucidRenderer.paramF || false;
   }
 
+  /**
+   * Returns current input as image data.
+   * @param {*} pyrLayer if set, returns specified pyramid layer only.
+   */
   getCurrentInput = (pyrLayer=undefined) => {
     if(!this.lucidRenderer.paramF) {
       throw "can't get current input before compiling input!";
@@ -323,6 +460,10 @@ export class LucidBackend{
     return imT.dataSync();
   }
 
+  /**
+   * Returns current input as tensor.
+   * @param {*} pyrLayer if set, returns specified pyramid layer only.
+   */
   getCurrentInputTensor = (pyrLayer=undefined) => {
     let trainable = this.lucidRenderer.trainable;
     if(pyrLayer !== undefined) {
@@ -346,14 +487,23 @@ export class LucidBackend{
     return imgToUint8;
   }
 
+  /**
+   * Gets last stored input for comparison view.
+   */
   getLastInput = () => {
     return this.lastInput;
   }
 
+  /**
+   * Returns shape of last stored input.
+   */
   getLastInputShape = () => {
     return this.lastInputShape;
   }
 
+  /**
+   * Stores current input for comparison view.
+   */
   storeCurrentInput = () => {
     if(this.lucidRenderer.paramF) {
       this.lastInput = this.getCurrentInput();
@@ -361,6 +511,10 @@ export class LucidBackend{
     }
   }
 
+  /**
+   * Returns activations of current layers' activations as image data.
+   * @param {*} channel Channel to get activations for.
+   */
   getCurrentActivations = (channel) => {
     let mapT = this.lucidRenderer.getActivationMaps();
     if(channel !== undefined && mapT){
@@ -372,6 +526,9 @@ export class LucidBackend{
     return mapT ? mapT.dataSync() : null;
   }
 
+  /**
+   * Returns mean and variance for activations of specified channel.
+   */
   getActivationStats = (channel) => {
     let mapT = this.lucidRenderer.getActivationMaps();
     if(channel !== undefined && mapT){
@@ -389,10 +546,16 @@ export class LucidBackend{
     }
   }
 
+  /**
+   * Returns number of channels of current layer.
+   */
   getChannelNumber = () => {
     return this.lucidRenderer.getChannelNumber();
   }
 
+  /**
+   * Returns class prediction for current input.
+   */
   getCurrentPrediction = () => {
     if(!this.lucidRenderer.paramF) {
       throw "can't get current input before compiling input!";
@@ -400,14 +563,23 @@ export class LucidBackend{
     return this.lucidRenderer.getClassPrediction.dataSync();
   }
 
+  /**
+   * Returns shape of activation tensor of currently selected layer.
+   */
   getActivationShape = () => {
     return this.lucidRenderer.getActivationShape();
   }
 
+  /**
+   * Returns output shape for specified layer.
+   */
   getShapeForLayer = (layer) => {
     return this.lucidRenderer.model.getLayer(layer).output.shape;
   }
 
+  /**
+   * Returns input shape for current model.
+   */
   getModelInputShape = () => {
     if(this.lucidRenderer.model){
       return this.lucidRenderer.model.input.shape;
@@ -416,15 +588,25 @@ export class LucidBackend{
     }
   }
 
+  /**
+   * Returns currently selected input size.
+   */
   getInputSize = () => {
     return this.lucidRenderer.inputParams.inputSize;
   }
 
+  /**
+   * Check if model is loaded.
+   */
   hasModel = () => {
     return this.loadStatus === loadStates.LOADED ||
             this.loadStatus === loadStates.OPTIMIZING;
   }
 
+  /**
+   * Get image data in 0-255 range from tensor.
+   * @param {*} x image tensor
+   */
   deprocessImage(x) {
     return tf.tidy(() => {
       const max = x.max();
@@ -441,6 +623,9 @@ export class LucidBackend{
     });
   }
 
+  /**
+   * Check if renderer is optimizing.
+   */
   isOptimizing() {
     return this.lucidRenderer.isOptimizing;
   }

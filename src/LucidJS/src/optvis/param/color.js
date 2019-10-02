@@ -1,20 +1,3 @@
-// Copyright 2019 The Lucid Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-// ==============================================================================
-
-// Functions for transforming and constraining color channels.
-
 import * as tf from '@tensorflow/tfjs';
 
 const colorCorrelationNormalized = tf.tensor(
@@ -29,6 +12,14 @@ const colorCorrelationNormalizedInverse = tf.tensor(
 
 const colorMean = tf.tensor([0.48, 0.46, 0.41]);
 
+/**
+ * Transforms the optimization parameter values into valid RGB space and applies optional
+ * additional functions.
+ * @param {*} t Input tensor
+ * @param {boolean} decorrelate Decorrelate colors
+ * @param {boolean} sigmoid Apply sigmoid
+ * @param {boolean} normalize Normalize to 1.0
+ */
 export function toValidRgb(t, decorrelate=false, sigmoid=false, normalize=true) {
   if (decorrelate) {
     t = linearDecorrelateColor(t);
@@ -45,6 +36,10 @@ export function toValidRgb(t, decorrelate=false, sigmoid=false, normalize=true) 
   return t;
 }
 
+/**
+ * Applies linear decorrelation to input tensor.
+ * @param {*} t Input tensor
+ */
 export function linearDecorrelateColor(t) {
   let tFlat = tf.reshape(t, [-1, 3]);
   tFlat = tf.matMul(tFlat, colorCorrelationNormalized, false, true);
@@ -52,6 +47,11 @@ export function linearDecorrelateColor(t) {
   return t;
 }
 
+/**
+ * Applies inverse decorrelation: can be used to preserve color values when the input is initalized
+ * with an image and decorrelation is applied afterwards in the computation graph.
+ * @param {*} t Input tensor
+ */
 export function inverseDecorrelate(t) {
   t = t.sub(colorMean);
   let tFlat = tf.reshape(t, [-1, 3]);

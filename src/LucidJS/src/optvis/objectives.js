@@ -1,54 +1,9 @@
 import * as tf from '@tensorflow/tfjs';
 
-export class Objective{
-  constructor(objectiveFunc, name='', description=''){
-    this.objectiveFunc = objectiveFunc;
-    this.name = name;
-    this.description = description;
-  }
-
-  add(other) {
-    throw 'Adding objectives not implemented yet!';
-  }
-
-  neg() {
-    throw 'Negating objective not implemented yet!';
-  }
-
-  sub() {
-    throw 'Subtracting objectives not implemented yet!';
-  }
-
-  _call(T) {
-    const auxModel = tf.model({inputs: T.inputs, outputs: this.objectiveFunc(T)});
-    const lossFunction = () => auxModel.apply(T.inputs[0], {training: true});
-    return lossFunction;
-  }
-}
-
-export function wrapObjective(f, ...args){
 /**
- *Decorator for creating Objective factories.
- *
- *
- * Changes f from the closure: (args) => () => TF Tensor
- * into an Obejective factory: (args) => Objective
- *
- * while perserving function name, arg info, docs... for interactive python.
+ * Visualize a single channel.
  */
-
- const objectiveFunc = (args) => f(args);
- const objectiveName = f.name;
- const argsStr = 'args_str not yet implemented!'
- const description = objectiveName + ' ' + argsStr;
- const obj =  new Objective(objectiveFunc, objectiveName, description);
- return obj;
-}
-
 export function channel(model, options) {
-  /**
-   * Visualize a single channel.
-   */
  const layerOutput = model.getLayer(options.layer).output;
  const auxModel = tf.model({inputs: model.inputs, outputs: layerOutput});
  const mul = options.neg ? 1 : -1;
@@ -64,15 +19,13 @@ export function channel(model, options) {
   return inner;
 }
 
-
+/**
+ * Maximize 'interestingness' at some layer.
+ *
+ *
+ * See Mordvintsev et al., 2015.
+ */
 export function deepdream(model, options) {
-  /**
-   * Maximize 'interestingness' at some layer.
-   *
-   *
-   * See Mordvintsev et al., 2015.
-   */
-
    const layerOutput = model.getLayer(options.layer).output;
    const auxModel = tf.model({inputs: model.inputs, outputs: layerOutput});
    const mul = options.neg ? 1 : -1;
@@ -85,11 +38,12 @@ export function deepdream(model, options) {
     return inner;
 }
 
+/**
+ * Maximize output / class activation.
+ * @param {*} model 
+ * @param {*} options 
+ */
 export function output(model, options) {
-  /**
-   *
-   */
-
    const layerOutput = model.outputs[0].inputs[0];
    const auxModel = tf.model({inputs: model.inputs, outputs: layerOutput});
    const mul = options.neg ? 1 : -1;
@@ -103,26 +57,25 @@ export function output(model, options) {
     return inner;
 }
 
+/**
+* Visualize a single neuron of a single channel.
+*
+* Defaults to the center neuron. When width and height are even numbers, we
+* choose the neuron in the bottom right of the center 2x2 neurons.
+*
+* Odd width & height:               Even width & height:
+*
+* +---+---+---+                     +---+---+---+---+
+* |   |   |   |                     |   |   |   |   |
+* +---+---+---+                     +---+---+---+---+
+* |   | X |   |                     |   |   |   |   |
+* +---+---+---+                     +---+---+---+---+
+* |   |   |   |                     |   |   | X |   |
+* +---+---+---+                     +---+---+---+---+
+*                                   |   |   |   |   |
+*                                   +---+---+---+---+
+*/
 export function neuron(model, options) {
-  /**
-  * Visualize a single neuron of a single channel.
-  *
-  * Defaults to the center neuron. When width and height are even numbers, we
-  * choose the neuron in the bottom right of the center 2x2 neurons.
-  *
-  * Odd width & height:               Even width & height:
-  *
-  * +---+---+---+                     +---+---+---+---+
-  * |   |   |   |                     |   |   |   |   |
-  * +---+---+---+                     +---+---+---+---+
-  * |   | X |   |                     |   |   |   |   |
-  * +---+---+---+                     +---+---+---+---+
-  * |   |   |   |                     |   |   | X |   |
-  * +---+---+---+                     +---+---+---+---+
-  *                                   |   |   |   |   |
-  *                                   +---+---+---+---+
-  */
-
    const layerOutput = model.getLayer(options.layer).output;
    const auxModel = tf.model({inputs: model.inputs, outputs: layerOutput});
    const mul = options.neg ? 1 : -1;
@@ -149,6 +102,11 @@ export function neuron(model, options) {
     return inner;
 }
 
+/**
+ * Maximize single "pixel" location
+ * @param {*} model 
+ * @param {*} options 
+ */
 export function spatial(model, options) {
 
    const layerOutput = model.getLayer(options.layer).output;
@@ -175,6 +133,14 @@ export function spatial(model, options) {
     return inner;
 }
 
+/**
+ * Experimental style objective
+ * @param {*} model 
+ * @param {*} contentImg 
+ * @param {*} styleImg 
+ * @param {*} contentLrs 
+ * @param {*} styleLrs 
+ */
 export function style(model, contentImg, styleImg, contentLrs, styleLrs) {
 
   const targetStyleActivations = getActivationsForLayers(
@@ -210,6 +176,13 @@ export function style(model, contentImg, styleImg, contentLrs, styleLrs) {
   return inner;
 }
 
+/**
+ * Difference between activations of two input images.
+ * @param {*} imgActivations 
+ * @param {*} targetActivations 
+ * @param {*} transformF 
+ * @param {*} activLossF 
+ */
 function activationDifference(
   imgActivations, targetActivations, transformF=null, activLossF=meanL1Loss){
   const losses = [];
@@ -226,6 +199,12 @@ function activationDifference(
   return tf.addN(losses);
 }
 
+/**
+ * Returns list of activation tensors for each layer.
+ * @param {*} model 
+ * @param {*} image 
+ * @param {*} layers 
+ */
 function getActivationsForLayers(model, image, layers) {
   const outputs = getLayerOutputs(model, layers);
 
@@ -246,12 +225,22 @@ function getActivationsForLayers(model, image, layers) {
   return activationList;
 }
 
+/**
+ * Returns new model with specified outputs.
+ * @param {*} model 
+ * @param {*} outputs 
+ */
 function getAuxModel(model, outputs){
   const auxModel = tf.model(
     {inputs: model.inputs, outputs: outputs});
   return auxModel;
 }
 
+/**
+ * Returns output layer tensors.
+ * @param {*} model 
+ * @param {*} layers 
+ */
 function getLayerOutputs(model, layers) {
   const outputs = [];
   layers.forEach((layerName) => {
@@ -261,6 +250,10 @@ function getLayerOutputs(model, layers) {
   return outputs;
 }
 
+/**
+ * Returns array of tensors from tensor or array of tensors
+ * @param {*} tensorOrArray 
+ */
 function makeArray(tensorOrArray) {
   if(!Array.isArray(tensorOrArray)){
     tensorOrArray  = [tensorOrArray];
@@ -268,6 +261,13 @@ function makeArray(tensorOrArray) {
   return tensorOrArray;
 }
 
+/**
+ * Optimize for specified activation modifications.
+ * @param {*} model 
+ * @param {*} originalImage 
+ * @param {*} activationModDict 
+ * @param {*} activationLossF 
+ */
 export function activationModification(model, originalImage,
   activationModDict, activationLossF=meanL2Loss){
   const layerOutputs = [];
@@ -340,6 +340,10 @@ export function activationModification(model, originalImage,
   return inner;
 }
 
+/**
+ * Returns gram matrix of input tensor, normalized by length of flat length.
+ * @param {*} array 
+ */
 function gramStyle(array){
   const sh = array.shape;
   const channels = sh[sh.length-1];
@@ -349,40 +353,20 @@ function gramStyle(array){
   return gram.div(length);
 }
 
-
+/**
+ * Returns mean of absolute differences.
+ * @param {*} g1 
+ * @param {*} g2 
+ */
 function meanL1Loss(g1, g2) {
   return tf.mean(tf.abs(g1.sub(g2)));
 }
 
-
+/**
+ * Returns mean of squared differences.
+ * @param {*} g1 
+ * @param {*} g2 
+ */
 function meanL2Loss(g1, g2) {
   return tf.mean(tf.pow(g1.sub(g2), 2));
-}
-
-export function asObjective(obj) {
-  /** Convert obj into Objective class.
-  *
-  * Strings of the form "layer:n" become the Objective channel(layer, n).
-  * Objectives are returned unchanged.
-  *
-  * Args:
-  *   obj: string or Objective.
-
-  * Returns:
-  *   Objective
-  */
-
-  if(typeof obj === 'object') {
-    return obj;
-  } else if (typeof obj === 'string') {
-    const tokens = obj.split(':');
-    const layer = strip(tokens[0]);
-    const n = parseInt(tokens[1]);
-  } else {
-    throw 'Objective type not implemented yet!';
-  }
-}
-
-function strip(str) {
-    return str.replace(/^\s+|\s+$/g, '');
 }

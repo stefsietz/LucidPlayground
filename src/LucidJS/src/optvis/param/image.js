@@ -3,6 +3,15 @@ import {pixelImage, laplacianPyramid,
   makeLaplacianPyramidFromImgData, baseImageLaplacianPyramid} from './spatial.js';
 import * as tf from '@tensorflow/tfjs';
 
+/**
+ * Returns input function and variables with naive pixel space parametrization of an existing image.
+ * @param {Uint8Array} imgArray Input image data
+ * @param {*} w width
+ * @param {*} h height
+ * @param {*} ch channels
+ * @param {*} batch batchsize
+ * @param {*} decorrelate decorrelate colors
+ */
 export function naiveFromImage(
   imgArray, w, h=undefined, ch=3, batch=undefined, decorrelate=true) {
   const _w = w;
@@ -33,9 +42,19 @@ export function naiveFromImage(
   return [t, trainable];
 }
 
+/**
+ * Returns input function and variables with naive pixel space parametrization with random initialization.
+ * @param {*} w width
+ * @param {*} h height
+ * @param {*} ch channels
+ * @param {*} batch batchsize
+ * @param {*} sd standard deviation
+ * @param {*} decorrelate decorrelate colors
+ * @param {*} alpha use alpha channel
+ */
 export function randImage(
   w, h=undefined, ch=3, batch=undefined, sd=undefined,
-  decorrelate=false, fft=false, alpha=false
+  decorrelate=false, alpha = false
 ) {
   const _w = w;
   const _h = h ? h : w;
@@ -60,6 +79,16 @@ export function randImage(
   return [t, trainable];
 }
 
+/**
+ * Returns input function and variables with laplacian pyramid parametrization and random initialization.
+ * @param {*} w width
+ * @param {*} h height
+ * @param {*} ch channels
+ * @param {*} batch batchsize
+ * @param {*} sd standard deviation
+ * @param {*} decorrelate decorrelate colors
+ * @param {*} nLevels number of pyramid layers
+ */
 export function randLaplacianPyramid(
   w, h=undefined, ch=3, batch=undefined, sd=undefined,
   decorrelate=true, nLevels=6
@@ -81,6 +110,16 @@ export function randLaplacianPyramid(
   return [t, trainable];
 }
 
+/**
+ * Returns input function and variables in naive pixel space parametrization with image initialization.
+ * @param {*} imgArray input image
+ * @param {*} w width
+ * @param {*} h height
+ * @param {*} ch channels
+ * @param {*} batch batchsize
+ * @param {*} decorrelate decorrelate colors
+ * @param {*} nLevels number of pyramid layers
+ */
 export function imgLaplacianPyramid(imgArray,
   w, h=undefined, ch=3, batch=undefined, decorrelate=true, nLevels=6) {
   const _w = w;

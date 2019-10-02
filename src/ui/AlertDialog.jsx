@@ -6,6 +6,9 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
+/**
+ * Displays alert dialog with message and close callback.
+ */
 export default function alertDialog(message, onClose) {
   let open = false;
   let title = "";

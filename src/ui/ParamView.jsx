@@ -16,6 +16,9 @@ import {ttInputParams, ttObjectiveParams} from '../strings'
 const objectives = Object.entries(
   objectiveTypes).map((keyAndValue) => keyAndValue[1]);
 
+  /**
+   * Component that contains parameter settings.
+   */
 export default class ParamView extends Component {
 
   constructor(props){

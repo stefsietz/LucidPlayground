@@ -3,6 +3,9 @@ import { Engine } from "@babylonjs/core/Engines/engine";
 import { Scene } from "@babylonjs/core/scene";
 import './BabylonScene.css'
 
+/**
+ * Component that wraps BabylonJS scene.
+ */
 export default class BabylonScene extends Component {
 
   constructor(props){

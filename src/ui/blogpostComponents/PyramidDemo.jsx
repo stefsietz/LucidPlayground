@@ -10,6 +10,9 @@ import PlayButtonGroup from "./PlayButtonGroup"
 import {fillCanvasPixelsWithRgbAndAlpha, fillCanvasPixelsWithGreyAndAlpha}
     from '../../DrawingHelper.js';
 
+/**
+ * Component that shows multiple laplacian pyramid levels.
+ */
 export default class PyramidDemo extends Component {
 
     constructor(props) {

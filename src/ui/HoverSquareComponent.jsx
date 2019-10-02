@@ -1,5 +1,10 @@
 import React, { Component } from 'react';
 
+/**
+ * Component with mouse event listeners, used ase base for components
+ * that let the user select "square" sub regions, like feature maps
+ * or neuron locations.
+ */
 export default class HoverSquareComponent extends Component {
 
   constructor(props) {

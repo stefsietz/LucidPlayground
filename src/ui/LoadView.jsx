@@ -41,6 +41,9 @@ const styles = theme => ({
   },
 });
 
+/**
+ * Component containing controls for loading the model and starting / stopping / resetting optimization.
+ */
 class LoadView extends Component {
 
   constructor(props) {

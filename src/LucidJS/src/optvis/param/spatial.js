@@ -1,20 +1,12 @@
-// Copyright 2019 The Lucid Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-// ==============================================================================
 import * as tf from '@tensorflow/tfjs';
 import {inverseDecorrelate} from './color.js';
 
+/**
+ * Returns randomly initialized input image variables.
+ * @param {*} shape 
+ * @param {*} sd 
+ * @param {*} initVal 
+ */
 export function pixelImage(shape, sd=undefined, initVal=undefined) {
   if (sd !== undefined && initVal !== undefined) {
     console.log("`pixel_image` received both an initial value and a sd " +
@@ -27,6 +19,13 @@ export function pixelImage(shape, sd=undefined, initVal=undefined) {
   return tf.variable(initVal);
 }
 
+/**
+ * Returns image-initialized laplacian pyramid as summed image and individual layers.
+ * @param {*} shape image shape
+ * @param {*} imgData initial image
+ * @param {*} nLevels pyramid layers
+ * @param {*} invDec inverse decorrelate
+ */
 export function makeLaplacianPyramidFromImgData(shape, imgData, nLevels=6,
 invDec=true){
   const [summedImg, layers] = tf.tidy(() => {
@@ -58,6 +57,13 @@ invDec=true){
   return [summedImg, layers];
 }
 
+/**
+ * Returns image-initialized laplacian pyramid as sum function and individual layer variables.
+ * @param {*} shape image shape
+ * @param {*} imgData initial image
+ * @param {*} nLevels pyramid layers
+ * @param {*} decorrelate decorrelate colors
+ */
 export function baseImageLaplacianPyramid(shape, imgData, nLevels=6, decorrelate){
   if(shape.length !== 4 ){
     throw "shape needs batch dimension!";
@@ -90,6 +96,13 @@ export function baseImageLaplacianPyramid(shape, imgData, nLevels=6, decorrelate
   return [f, trainable];
 }
 
+/**
+ * Returns random-initialized laplacian pyramid as sum function and individual layer variables.
+ * Contains outcommented code for fading in pyramid layers.
+ * @param {*} shape tensor shape
+ * @param {*} sd standard deviation
+ * @param {*} nLevels pyramid layers
+ */
 export function laplacianPyramid(shape, sd, nLevels=6){
   if(shape.length !== 4 ){
     throw "shape needs batch dimension!";
@@ -138,6 +151,10 @@ function gaussianBlur2D3x3(ch) {
   return conv2d;
 }
 
+/**
+ * Computes gaussian 3x3 kernel
+ * @param {*} ch channels
+ */
 function gaussianKernel3x3(ch) {
   const c = 1/16;
   const s = 1/8;

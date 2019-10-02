@@ -24,7 +24,9 @@ export const loadStates = {
   OPTIMIZING: 'optimizing',
 }
 
-
+/**
+ * Encapsulates state and methods for various feature visualization techniques.
+ */
 export class LucidRenderer {
   constructor(){
     this.inputParams = {
@@ -76,10 +78,16 @@ export class LucidRenderer {
     tf.setBackend('webgl', true);
   }
 
+  /**
+   * Assigns model to the renderer.
+   */
   setModel = (model) => {
     this.model = model;
   }
 
+  /**
+   * Disposes renderer.
+   */
   dispose = () => {
     this.featureMapAuxModel = null;
     this.layerOutput = null;
@@ -89,7 +97,7 @@ export class LucidRenderer {
     this.activationShape = null;
 
     this.iterations = 0;
-    this.optimizer = tf.train.adam(this.objectiveParams.learningRate);
+    this.optimizer = null;
     this.ctr = 0;
     this.optimCallback = () => {};
   }
@@ -100,7 +108,6 @@ export class LucidRenderer {
    * - layer: last Conv layer
    * - neuron: central neuron for initial layer
    *
-   * @return {type}  description
    */
   initObjectiveParamsForModel = () => {
     let firstConvLayer = null;
@@ -127,9 +134,9 @@ export class LucidRenderer {
    * setInputParams - Sets input params and causes re-compilation of model,
    * not possible during running optimization.
    *
-   * @param  {type} inputParams inputParams object containing all necessary
+   * @param  {*} inputParams inputParams object containing all necessary
    * properties
-   * @return {type}
+   * @return {*}
    */
   setInputParams = (inputParams) => {
     if(this.isOptimizing){
@@ -148,6 +155,9 @@ export class LucidRenderer {
     this.compileInput();
   }
 
+  /**
+   * Generates input parametrization and initializes regularization transform chain.
+   */
   compileInput = () => {
     const w = this.inputParams.inputSize;
     const h = this.inputParams.inputSize;
@@ -171,6 +181,11 @@ export class LucidRenderer {
     this.initTransformF();
   }
 
+  /**
+   * Stars optimization loop.
+   * @param {*} iterations number of iterations to execute
+   * @param {*} optimCallback callback to be run after each optimization step
+   */
   startOptimization = (iterations=1000, optimCallback=() => {}) => {
     this.iterations=iterations;
     this.optimizer = tf.train.adam(this.objectiveParams.learningRate);
@@ -181,6 +196,10 @@ export class LucidRenderer {
     this.optimize();
   }
 
+  /**
+   * Stops optimization loop.
+   * @param {*} cb callback to be run after last optimization step before stopping.
+   */
   stopOptimization = (cb) => {
     this.iterations = 0;
     this.ctr = 0;
@@ -192,10 +211,16 @@ export class LucidRenderer {
     }
   }
 
+  /**
+   * Check if renderer has optimization target layer set.
+   */
   canOptimize = () => {
     return this.layer !== ''
   }
 
+  /**
+   * Do one optimization step
+   */
   optimize = () => {
     this.isOptimizing = true;
 
@@ -216,6 +241,9 @@ export class LucidRenderer {
     });
   }
 
+  /**
+   * Returns class prediction of current input image.
+   */
   getClassPrediction = () => {
     const weights = this.objectiveParams.pyrLayerWeights;
     return tf.tidy(() => {
@@ -235,6 +263,9 @@ export class LucidRenderer {
     });
   }
 
+  /**
+   * Returns number of channels of current layer.
+   */
   getChannelNumber = () => {
     if(this.layerOutput) {
       const [b, w, h, ch] = this.layerOutput.shape;
@@ -244,6 +275,9 @@ export class LucidRenderer {
     }
   }
 
+  /**
+   * Returns activation tensors for currently selected layer.
+   */
   getActivationMaps = () => {
     if(this.featureMapAuxModel) {
       return tf.tidy( () =>{
@@ -264,6 +298,9 @@ export class LucidRenderer {
     }
   }
 
+  /**
+   * Returns activation tensor shape for currently selected layer.
+   */
   getActivationShape = () => {
     if(this.featureMapAuxModel) {
       if(!this.activationShape){
@@ -275,6 +312,9 @@ export class LucidRenderer {
     }
   }
 
+  /**
+   * Returns feature map tensor in 0 - 255 color range.
+   */
   deprocessFeatureMap(featureMap) {
     return tf.tidy(() => {
       const {mean, variance} = tf.moments(featureMap);
@@ -284,10 +324,16 @@ export class LucidRenderer {
     });
   }
 
+  /**
+   * Sets the optimization objective type.
+   */
   setObjectiveType = (type) => {
     this.objectiveParams.type = type;
   }
 
+  /**
+   * Prepares optimization for current objective.
+   */
   compileObjective = () => {
     this.compileLossF();
 
@@ -295,6 +341,9 @@ export class LucidRenderer {
     this.setFeatureMapLayer(this.objectiveParams.featureMapLayer);
   }
 
+  /**
+   * Prepares loss function for current objective.
+   */
   compileLossF = () => {
     let transformF = this.transformF;
     if(this.objectiveParams.type === objectiveTypes.CLASS){
@@ -310,6 +359,10 @@ export class LucidRenderer {
     };
   }
 
+  /**
+   * Returns objective function depending on specified type.
+   * @param {string} type optimization type
+   */
   getObjectiveF = (type) => {
     const options = {
       layer: this.objectiveParams.layer,
@@ -347,7 +400,7 @@ export class LucidRenderer {
 
 
   /**
-   * setLayer - Sets layer for optimization objective. Can't change during
+   * Sets layer for optimization objective. Can't change during
    * optimization. Resets target neuron to central neuron.
    *
    * @param  {type} layer layer to optimize for
@@ -377,7 +430,7 @@ export class LucidRenderer {
   }
 
   /**
-   * setFeatureMapLayer - Sets layer to output featuremaps for.
+   * Sets layer to output featuremaps for.
    *
    * @param  {type} layer layer to output featuremaps for.
    * @return {type}
@@ -392,7 +445,7 @@ export class LucidRenderer {
   }
 
   /**
-   * setChannel - Sets target channel. Can be changed interactively during
+   * Sets target channel. Can be changed interactively during
    * optimization.
    *
    * @param  {type} channel target channel
@@ -407,7 +460,7 @@ export class LucidRenderer {
   }
 
   /**
-   * setNeuron - Sets target neuron. Can be changed interactively during
+   * Sets target neuron. Can be changed interactively during
    * optimization.
    *
    * @param  {type} x x coordinate of neuron in featuremap
@@ -425,7 +478,7 @@ export class LucidRenderer {
 
 
   /**
-   * getCentralNeuronCoords - Get the 2D coordinates of the central neuron for
+   * Get the 2D coordinates of the central neuron for
    * a specific layer.
    *
    * @param  {type} layer layer to get neuron coordinates for.
@@ -442,6 +495,9 @@ export class LucidRenderer {
     return [Math.floor(pooledW/2), Math.floor(pooledW/2)];
   }
 
+  /**
+   * Set style image for style transfer.
+   */
   setStyleImage = (styleImg) => {
     if(this.objectiveParams.styleImage) {
       this.objectiveParams.styleImage.dispose();
@@ -460,6 +516,9 @@ export class LucidRenderer {
     this.compileLossF();
   }
 
+  /**
+   * Set content image for style transfer.
+   */
   setContentImage = (contentImg) => {
     if(this.objectiveParams.contentImage) {
       this.objectiveParams.contentImage.dispose();
@@ -478,23 +537,9 @@ export class LucidRenderer {
     this.compileLossF();
   }
 
-  getResizedImage = (imData, w, h, ch=4) => {
-    const resizedImage = tf.tidy(() => {
-      const imgShape = [1, imData.height, imData.width, ch];
-
-      let refImg = tf.tensor(Uint8Array.from(imData.data),
-       imgShape, 'float32');
-      refImg = tf.image.resizeBilinear(refImg, [w, h]);
-      refImg = refImg.slice([0, 0, 0, 0], [1, h, w, 3]);
-
-      const imageData = refImg.dataSync();
-      const imT = tf.tensor(imageData,
-       [1, h, w, 3], 'float32');
-      return imT;
-    });
-    return resizedImage;
-  }
-
+  /**
+   * Resizes style image to fit input image dimensions.
+   */
   resizeStyleImage = () => {
     if(this.objectiveParams.styleImage) {
       const styleImageT = tf.tidy(() => {
@@ -516,17 +561,19 @@ export class LucidRenderer {
     }
   }
 
+  /**
+   * Sets layers that should be considered for style loss.
+   */
   setStyleLayers = (styleLayers) => {
     this.objectiveParams.styleLayers = styleLayers;
     this.compileLossF();
   }
 
   /**
-   * setClass - Sets target class. Can be changed interactively during
+   * Sets target class. Can be changed interactively during
    * optimization.
    *
    * @param  {type} classInd target class index
-   * @return {type}
    */
   setClass = (classInd) => {
     if(classInd < 0){
@@ -538,10 +585,9 @@ export class LucidRenderer {
 
 
   /**
-   * setNegative - Set negative optimization objective status
+   * Set negative optimization objective status
    *
    * @param  {type} negative negative optimization enabled
-   * @return {type}
    */
   setNegative = (negative) => {
     this.objectiveParams.negative = negative;
@@ -550,9 +596,8 @@ export class LucidRenderer {
 
 
   /**
-   * initTransformF - Builds input transform chain
+   * Builds input transform chain
    *
-   * @return {type}  description
    */
   initTransformF = () => {
     let transforms = [jitter(this.objectiveParams.jitter)];
@@ -572,10 +617,9 @@ export class LucidRenderer {
 
 
   /**
-   * setJitter - Set input jitter
+   * Set input jitter
    *
    * @param  {type} jitter amount of jitter (defaults to 5)
-   * @return {type}        description
    */
   setJitter = (jitter) => {
     this.objectiveParams.jitter = jitter;
@@ -584,10 +628,9 @@ export class LucidRenderer {
   }
 
   /**
-   * setJitter - Set input jitter
+   * Set optimizer learning rate
    *
-   * @param  {type} jitter amount of jitter (defaults to 5)
-   * @return {type}        description
+   * @param  {type} learningRate learning rate
    */
   setLearningRate = (learningRate) => {
     this.objectiveParams.learningRate = learningRate;

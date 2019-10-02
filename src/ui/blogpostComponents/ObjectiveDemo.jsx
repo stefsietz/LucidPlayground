@@ -29,7 +29,10 @@ const selectableParameters = [
     {type: "channel", layer: "mixed5a_1x1", channel: 9},
 ]
 
-export default class PyramidDemo extends Component {
+/**
+ * Component that contains controls for changing the optimization objective.
+ */
+export default class ObjectiveDemo extends Component {
 
     constructor(props) {
         super(props);

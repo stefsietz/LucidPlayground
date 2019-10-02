@@ -16,6 +16,10 @@ import HoverSquareComponent from './HoverSquareComponent'
 const MAX_SQR_W = 256;
 const MIN_SQR_W = 3;
 
+/**
+ * Displays feature maps with activation values encoded in red/blue color scheme.
+ * Lets user select channel to optimize for. 
+ */
 export default class ActivationView extends HoverSquareComponent {
 
   constructor(props) {
@@ -36,10 +40,6 @@ export default class ActivationView extends HoverSquareComponent {
     this.hoveredSquare = -1;
 
     this.lastDepth = -1;
-  }
-
-  getShiftIsDown() {
-    return this.shiftIsDown;
   }
 
   onSceneMount = (e) => {
@@ -129,6 +129,9 @@ export default class ActivationView extends HoverSquareComponent {
     this.onResize(width, height);
   }
 
+  /**
+   * Calls methods that update scene state and then renders.
+   */
   updateAndRender(){
     if (this.scene) {
       this.calculateSquareLayout();
@@ -140,6 +143,9 @@ export default class ActivationView extends HoverSquareComponent {
     }
   }
 
+  /**
+   * Creates or updates BabylonJS texture width feature map activation data.
+   */
   updateTexture() {
     let width = 1;
     let height = 1;
@@ -181,6 +187,9 @@ export default class ActivationView extends HoverSquareComponent {
     this.lastDepth = depth;
   }
 
+  /**
+   * Updates shader uniforms.
+   */
   updateUniforms() {
     if(this.w){
       this.shaderMaterial.setFloat('viewWidth', this.w);
@@ -207,6 +216,9 @@ export default class ActivationView extends HoverSquareComponent {
     )
   }
 
+  /**
+   * Resize event action.
+   */
   onResize = (w, h) => {
     this.w = w;
     this.h = h;
@@ -218,6 +230,9 @@ export default class ActivationView extends HoverSquareComponent {
     this.updateAndRender();
   }
 
+  /**
+   * Calculates y position for camera.
+   */
   updateYPos() {
     const minY = -this.h/2;
     const y = this.yOffset() + minY;
@@ -225,6 +240,9 @@ export default class ActivationView extends HoverSquareComponent {
     this.camera.position.y = y;
   }
 
+  /**
+   * Calculates y offset of view depending on scroll position.
+   */
   yOffset() {
     const minY = -this.h/2;
     let maxY = -this.requiredHeight + this.h/2;
@@ -235,6 +253,10 @@ export default class ActivationView extends HoverSquareComponent {
     return this.scrollPos * (maxY - minY);
   }
 
+  /**
+   * Creates square geometry that gets instanced for feature map representations and its shader.
+   * @param {*} scene 
+   */
   createBaseSquare(scene) {
     this.shaderMaterial = new ShaderMaterial(
       "shader", scene, "./activationSquareShader",
@@ -248,6 +270,9 @@ export default class ActivationView extends HoverSquareComponent {
     this.baseSquare.material = this.shaderMaterial;
   }
 
+  /**
+   * Updates square instances according to current required number.
+   */
   updateSquares() {
     if(this.squareProps.length !== this.squares.length) {
       const diff = this.squareProps.length - this.squares.length;
@@ -278,6 +303,9 @@ export default class ActivationView extends HoverSquareComponent {
     })
   }
 
+  /**
+   * Calculates square layout params according to current square width.
+   */
   calculateSquareLayout() {
     const viewWidth = this.w;
     const viewHeight = this.h;
@@ -312,6 +340,11 @@ export default class ActivationView extends HoverSquareComponent {
     }
   }
 
+  /**
+   * Returns square index of square beneath mouse cursor.
+   * @param {*} x 
+   * @param {*} y 
+   */
   getHoveredSquare(x, y) {
       y -= this.yOffset();
       const viewWidth = this.w;

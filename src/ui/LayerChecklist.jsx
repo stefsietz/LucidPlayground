@@ -8,6 +8,10 @@ import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import CommentIcon from '@material-ui/icons/Comment';
 
+/**
+ * Component that lets the user select / unselect layers.
+ * Used for selecting style and content layers.
+ */
 export default class LayerChecklist extends Component {
   constructor(props) {
     super(props);

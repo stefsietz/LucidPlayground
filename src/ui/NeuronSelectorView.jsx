@@ -15,6 +15,9 @@ import "./DetailView.css";
 
 import HoverSquareComponent from './HoverSquareComponent'
 
+/**
+ * Component that lets the user select a neuron location.
+ */
 export default class ActivationView extends HoverSquareComponent {
 
   constructor(props) {

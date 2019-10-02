@@ -19,6 +19,9 @@ import { saveAs } from 'file-saver';
 import {ttActivationView} from '../strings'
 import { scdryPrvMode } from '../Home0';
 
+/**
+ * Component containing detail visualizations for current layer.
+ */
 export default class DetailView extends Component {
 
   constructor(props){
@@ -47,6 +50,9 @@ export default class DetailView extends Component {
     window.dispatchEvent(ev);
   }
 
+  /**
+   * Dynamically adapt dimensions of image preview.
+   */
   calcPrevWidth = () => {
     let wW = window.innerWidth;
     let wH = window.innerHeight;
@@ -63,6 +69,9 @@ export default class DetailView extends Component {
     return prevWidth;
   }
 
+  /**
+   * Trigger rendering with new width.
+   */
   reRender = () => {
     this.setState({prevWidth: this.calcPrevWidth()});
   }
@@ -225,6 +234,15 @@ export default class DetailView extends Component {
     return this.detail();
   }
 
+  /**
+   * Fills canvas with pixel data.
+   * @param {*} pixelData Raw pixel array
+   * @param {*} canvas Canvas to draw on to
+   * @param {*} w width of pixel data
+   * @param {*} h height of pixel data
+   * @param {boolean} rgb rgb or greyscale status of pixel data
+   * @param {*} channel channel to take from pixel data in case multiple channels are contained
+   */
   drawPixelsToCanvas(pixelData, canvas, w, h, rgb, channel=0){
     let canvCtx = canvas.getContext("2d");
     const cw = canvas.width;
@@ -259,6 +277,9 @@ export default class DetailView extends Component {
     }
   }
 
+  /**
+   * Converts array of pixel values into ImageData object.
+   */
   getImageDataFromPixelData(pixelData, w, h, rgb, mult=1, channel=0){
       let tempCanvas = document.createElement("canvas");
       tempCanvas.width = w;

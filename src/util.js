@@ -1,3 +1,8 @@
+/**
+ * Reads json file content from URL and passes it to callback.
+ * @param {*} file 
+ * @param {*} callback 
+ */
 export function loadJSON(file, callback) {
 
   var xobj = new XMLHttpRequest();
@@ -12,6 +17,11 @@ export function loadJSON(file, callback) {
   xobj.send(null);
 }
 
+/**
+ * Reads json file content from local file and passes it to callback.
+ * @param {*} file 
+ * @param {*} callback 
+ */
 export function loadJSONFromLocalFile(file, callback) {
   var reader = new FileReader();
 
