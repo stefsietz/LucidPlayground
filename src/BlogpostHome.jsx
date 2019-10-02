@@ -8,7 +8,7 @@ import * as d3 from "d3";
 import React, { Component } from 'react';
 import "./blogpost.css";
 import "./Home0.css";
-import { loadStates, objectiveTypes } from './LucidJS/src/optvis/renderer.js';
+import { loadStates } from './LucidJS/src/optvis/renderer.js';
 import Graph from './scene/Graph.js';
 import { LucidBackend } from './scene/LucidBackend.js';
 import { ttHelp } from './strings';
@@ -31,6 +31,14 @@ export const scdryPrvMode = {
   PAINT: 'paint',
   ACT_ADJUST: 'act_adjust',
   STYLE: 'style'
+}
+
+export const objectiveTypes = {
+  LAYER: 'layer',
+  CHANNEL: 'channel',
+  CLASS: 'class',
+  NEURON: 'neuron',
+  SPATIAL: 'spatial',
 }
 
 export const learningRates = [0.00005, 0.0001, 0.0005, 0.001,
@@ -532,7 +540,87 @@ export default class BlogpostHome extends Component {
             the otherwise abstract optimization process. Further, this interface
             opens the domain of feature visualization to non-experts, as no
             scripting is required.
+            </p>
+          <h2>What is feature visualization good for?</h2>
+          <p>
+          Let’s recall the general structure of a typical deep classification CNN: We start with a relatively high resolution input (e.g. 224x224 px) and process the image with a bunch of learned convolution filters, that all respond to different features (local intensity patterns), as well as point-wise activation functions (ReLU and alike) and pooling layers that reduce spatial resolution, until we get our final feature layer that has typically a low resolution like 7x7 px and is fed into some kind of classification network.
 
+          Simplistically this process can be described like so:
+          The network first looks at low level features like edges in various
+          directions, corners, etc.
+          Then it looks for patterns that are formed by these edges and corners.
+          Then it looks for larger patterns that are formed by the smaller
+          patterns from the last layers.
+          This is repeated several times.
+          Then it looks where the various high level patterns from the last 2d
+          layer are located and reasons about the class. (Sometimes the “where”
+          is not included in the reasoning)
+          </p>
+
+          <div className="videoBox">
+          <video width="730" controls>
+            <source src="videos/layer_activations_retimed.mp4" type="video/mp4"/>
+            Your browser does not support the video tag.
+          </video>
+          <p>
+          In the video above, you can see the graph view juxtaposed to the activation
+          view. We step through the network (Inception V1) from top to bottom,
+          clicking on some of the layers to reveal their activations. Red pixels
+          represent positive values and blue pixels represent negative values.
+          These red and blue images are the feature maps derived from the input
+          image. The video is sped up 5 times, but if you look carefully, you
+          will see that pooling layers reduce the resolution and that ReLU layers cut
+          off the negative parts, leaving only the red pixels. At the end we
+          scroll out (shift + scroll wheel) to reveal many more of the activated
+          feature maps of the layer right before the global average pooling. The
+          scrolling almost mimics the pooling operation, reducing each feature
+          map to just a single value. At this point, the convolutional part of
+          the network is over and the pooled values are fed into a fully
+          connected layer of the classification part.
+          </p>
+          </div>
+
+          <p>
+          What do these patterns look like? How do we visualize them? This is
+          what feature visualization is about. We could simply look at the
+          learned convolution kernels and try to figure out what they respond
+          to. On the first layer, this <a href="https://www.researchgate.net/figure/filters-from-the-first-layer-left-AlexNet-Right-our-ConvNet_fig2_282211796">might actually work</a>,
+          especially for networks where larger kernels (like 11x11 in AlexNet) are
+          used.
+          From the second layer onward, the detected patterns depend on
+          the previous layers as well though, and looking at the kernels
+          themselves doesn’t give us very useful information.
+          So, to visualize what the later layers respond to, we have to work
+          with more sophisticated techniques. It turns out that gradient ascent,
+          which can be explained as deriving how each input pixel influences the
+          activation of interest and then updating the pixels in a way that
+          increases the activation the most, is a pretty good option.
+          </p>
+          <div className="videoBox">
+          <img src="img/conv2d1.png" width="730" />
+          <p>
+          This image shows some examples of the type of features the first layer of
+          AlexNet responds to: At this stage we see mostly lines of various directions and
+          colours.
+          </p>
+          </div>
+          <p>
+          Instead of optimizing for channels in the network, that respond to
+          increasingly rich patterns when traversing the network, we can also
+          optimize for the class activations directly (before the softmax to be
+          exact). In theory it would be reasonable to assume that this should
+          give us images that look like their respective class: optimizing for
+          outptut “cat” should give us an image for a cat, right? In practice,
+          this is not the case at all, and to get an image that looks somewhere
+          near what we would expect, a bunch of regularization “tricks” have to
+          be used. From a different perspective, if a classification network
+          would exclusively result in “real” looking images of the respective
+          class when maximizing a certain output, we could reasonably assume
+          that the model is robust and has a good understanding of how the
+          object really looks like, having not just learned to collect evidence
+          from various patterns that are present in the image. I wouldn't dare
+          to assume that this is actually possible with how current CNN
+          architectures are constructed, though.
 
           </p>
           <h2>A short explanation how feature visualization works</h2>
@@ -838,6 +926,47 @@ export default class BlogpostHome extends Component {
           mean of that channel. Some of the other channels might change their
           activations as well, while others (less correlated to the current
           target) might stay mostly the same.
+          </p>
+
+          <div className="videoBox">
+          <video width="730" controls>
+            <source src="videos/channel_demo_retimed.mp4" type="video/mp4"/>
+            Your browser does not support the video tag.
+          </video>
+          <p>
+          In this video you can see the sped up optimization of the input first
+          to channel 15 of layer ‘mixed4a’, and then after a mouse click to
+          channel 16 of the same layer. It is clearly visible, how the
+          activation values change from a highly activated channel 15 to a
+          highly activated channel 16, simultaneously revealing eyes in the
+          image, because that is what channel 16 responds to.
+          </p>
+          </div>
+
+          <div className="videoBox">
+          <video width="730" controls>
+            <source src="videos/dragon_eye_retimed.mp4" type="video/mp4"/>
+            Your browser does not support the video tag.
+          </video>
+          <p>
+          Here we see an image* of a reptile eye. We already know, that
+          channel 16 of layer ‘mixed4a’ responds to patterns that look like
+          reptile eyes. This is confirmed by the strong activation in the center
+          of the selected feature map. Once the optimization starts, two things
+          can be observed: the feature map gets red in the outer parts as well
+          (strong activation) and in the input image there are eyes appearing
+          everywhere. The original eye stays quite similar though and only gets
+          adjusted slightly to better fit the “style” that the channel responds
+          to.
+          </p>
+
+            <p>
+          * <a href="https://www.flickr.com/photos/renemensen/7825808822/in/photolist-cVxjjj-9Li4sA-ku1aGj-Mtkkkd-aZEMiK-5fNvBj-6dGUvN-VCGrpw-cvRF65-oNvHki-eV3rWc-dDRy3K-TMJVR1-n7yYog-48ZQBS-VGMJ9N-ehgTEz-TQtRuK-n7ABXU-qSPu2K-Rz2fsX-T3XaKK-4A1LuN-77uoBZ-6cRyXu-5fNokj-pxki9q-pw83tC-q21mHo-9gvuMg-si3jZa-2eq1N3y-opkqDZ-bwsMfF-kviMeR-9kqXCq-TdrtiU-sYewiQ-n7r2Lz-TB7Xoo-59sf4v-kPbsTu-oKccvW-bzsJVR-GxZjgE-5CevrT-6cZqK8-donDZe-pcMaPP-cPSFP7">"Yellow Eye"</a>,
+          licensed under CC from flickr user "Alias 0591".
+          </p>
+          </div>
+
+          <p>
           The “layer” objective type is what is used in the famous “DeepDream”
           project. Here we do not optimize for individual channel activations,
           but all of the layer’s activations at once. Contrary to the channel
@@ -854,7 +983,7 @@ export default class BlogpostHome extends Component {
           important aspect of explainability. Does the network really know how
           the 1000 imagenet classes look like, can we recognize realistic
           objects in the result?
-          Oygard has achieved some great results in visualizing Inception v1
+          <a href="https://www.auduno.com/2015/07/29/visualizing-googlenet-classes/">A. Oygard</a> has achieved some great results in visualizing Inception v1
           classes by applying Gaussian blur to the image after each optimization
           step. Starting with a large radius and gradually decreasing it, he was
           able to first generate overall structure and then progressively finer
@@ -957,8 +1086,9 @@ export default class BlogpostHome extends Component {
             Thanks to Chris Olah for his initial advice and for his efforts
             on the Distill Slack channel.
             <br/>
-            To be completed...
           </p>
+          <h2>Code</h2>
+          <p><a href="https://github.com/stefsietz/LucidPlayground">https://github.com/stefsietz/LucidPlayground</a></p>
         </div>
 
       </article>

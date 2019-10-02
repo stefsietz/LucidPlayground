@@ -1011,3 +1011,8 @@ body {
     flex-direction: column;
     justify-content: space-evenly;
   }
+
+  .videoBox{
+    background-color: #eee;
+    padding: 10px;
+  }

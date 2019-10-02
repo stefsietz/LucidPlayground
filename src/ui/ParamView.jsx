@@ -42,11 +42,11 @@ export default class ParamView extends Component {
       <div className="paramContainer">
         <div className="paramColumn">
           <Tooltip title={this.props.showHelp ? ttInputParams : ''}>
-            <div className="titleContainer">
-              <h4 className="titleText">Input parameters</h4>
+            <div className="titleContainer" style={{display: "flex", flexFlow: "row"}}>
               <Button style={{"paddingTop": "2px",
               "paddingBottom": "2px",
-            "marginRight": "5px"}}
+            "marginRight": "5px",
+          flexGrow: 0}}
               variant='contained'
               color="primary"
               disabled={this.props.loadStatus === loadStates.OPTIMIZING}
@@ -54,6 +54,7 @@ export default class ParamView extends Component {
                 this.props.onApplyInputParams();
               }}
               >Apply</Button>
+              <h4 className="titleText" style={{flexGrow: 2}}>Input parameters</h4>
             </div>
           </Tooltip>
           <div id="inputParams" className="paramSettingsContainer">

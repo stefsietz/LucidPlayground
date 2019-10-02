@@ -26,3 +26,5 @@ public/web_model/
 *.bin
 
 *.jsbeautifyrc
+
+media/
