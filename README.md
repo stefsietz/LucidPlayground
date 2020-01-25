@@ -27,3 +27,20 @@ and put them into the public directory (structure should be src/public/models/[A
 ```
 npm start
 ```
+
+## How to Cite
+If you find this work useful, please consider using the follwing citing template:
+
+```
+
+@inproceedings{Jaunet:2019,
+  author = {Stefan Sietzen, Manuela Waldner},
+	title = {Interactive Feature Visualization in the Browser},
+	journal = {Proceedings of the Workshop on Visualization for AI explainability (VISxAI)},
+	year = {2019},
+	editors = {Mennatallah El-Assady, Duen Horng (Polo) Chau, Fred Hohman, Adam Perer, Hendrik Strobelt, Fernanda Viégas}
+	url = {http://visxai.stefansietzen.at/}
+}
+
+
+```
